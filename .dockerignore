@@ -1,0 +1,8 @@
+.dockerignore
+Dockerfile
+.env
+.gitignore
+.idea
+.vscode
+.mypy_cache/
+.__pycache__/
