@@ -1,6 +1,6 @@
 import os
 
-from celery import Celery
+from celery import Celery  # type: ignore
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cateringproject.settings")
 

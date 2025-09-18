@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "18fae01e961f69de018af93fa262978730764c686e30aeecddc78bae0c51ab3e"
+            "sha256": "8c55ebe257195b4c3b4d502c2991f28fc8ac0f3c588d297ec66cbb6d18736be7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -115,6 +115,22 @@
             "index": "pypi",
             "markers": "python_version >= '3.9'",
             "version": "==25.1"
+        },
+        "django-stubs": {
+            "hashes": [
+                "sha256:223c1a3324cd4873b7629dec6e9adbe224a94508284c1926b25fddff7a92252b",
+                "sha256:fc78384e28d8c5292d60983075a5934f644f7c304c25ae2793fc57aa66d5018b"
+            ],
+            "markers": "python_version >= '3.10'",
+            "version": "==5.2.5"
+        },
+        "django-stubs-ext": {
+            "hashes": [
+                "sha256:9b4b8ac9d32f7e6c304fd05477f8688fae6ed57f6a0f9f4d074f9e55b5a3da14",
+                "sha256:ecc628df29d36cede638567c4e33ff485dd7a99f1552ad0cece8c60e9c3a8872"
+            ],
+            "markers": "python_version >= '3.10'",
+            "version": "==5.2.5"
         },
         "djangorestframework": {
             "hashes": [
@@ -323,6 +339,31 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==0.5.3"
+        },
+        "types-django-filter": {
+            "hashes": [
+                "sha256:4eb6b8ce6321f94bc488ec71fa834aa932c8106dd6f5cbee85cf25500206bda6",
+                "sha256:d044a2ea97c34e079a0b5d8d7385e992b1b42568738e60cffd95feff0f4973f3"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.9'",
+            "version": "==25.1.0.20250914"
+        },
+        "types-pyyaml": {
+            "hashes": [
+                "sha256:0f8b54a528c303f0e6f7165687dd33fafa81c807fcac23f632b63aa624ced1d3",
+                "sha256:e7d4d9e064e89a3b3cae120b4990cd370874d2bf12fa5f46c97018dd5d3c9ab6"
+            ],
+            "markers": "python_version >= '3.9'",
+            "version": "==6.0.12.20250915"
+        },
+        "typing-extensions": {
+            "hashes": [
+                "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466",
+                "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548"
+            ],
+            "markers": "python_version >= '3.9'",
+            "version": "==4.15.0"
         },
         "tzdata": {
             "hashes": [

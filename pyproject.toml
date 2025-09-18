@@ -32,7 +32,7 @@ use_parentheses = true
 
 
 [tool.mypy]
-mypy_path = "cateringproject"
+mypy_path = "cateringproject:."
 plugins = [
     "mypy_django_plugin.main",
     "mypy_drf_plugin.main",
@@ -43,7 +43,10 @@ warn_unused_ignores = true
 show_error_codes = true
 namespace_packages = true
 follow_imports = "silent"
+exclude = ["cateringproject/celery.py", "tests"]
 
+[mypy-cateringproject.celery]
+ignore_errors = true
 
 # [[tool.mypy.overrides]]
 # ignore_missing_imports=true

@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.13-slim as base
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -12,7 +12,6 @@ WORKDIR /app
 RUN pip install --upgrade pip setuptools pipenv
 
 COPY Pipfile Pipfile.lock ./
-RUN pipenv install --system --deploy
 
 COPY . .
 
@@ -31,11 +30,11 @@ CMD [ "manage.py", "runserver", "0.0.0.0:8000" ]
 
 FROM base AS prod
 
-ENV DJANGO_DEBUG=
+ENV DJANGO_DEBUG=0
 ENV GUNICORN_CMD_ARGS="--bind 0.0.0.0:8000 --reload"
 
 RUN pipenv install --deploy --system
 
 EXPOSE 8000/tcp
 ENTRYPOINT [ "python" ]
-CMD [ "-m", "gunicorn", "config.wsgi:application"]
+CMD [ "-m", "gunicorn", "cateringproject.wsgi:application"]
