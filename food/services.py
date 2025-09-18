@@ -1,21 +1,23 @@
+from dataclasses import asdict, dataclass, field
 from time import sleep
-from dataclasses import dataclass, asdict, field
 
-from django.db.models import QuerySet
-
-from .mapper import RESTAURANT_EXTERNAL_TO_INTERNAL
-from shared.cache import CacheService
-from cateringproject.celery import app as celery_app
+from cateringproject import celery_app
 from food.providers import uklon
+from shared.cache import CacheService
 
-from .providers import kfc, silpo
-from .models import Order, OrderItem, Restaurant
 from .enums import OrderStatus
+from .mapper import RESTAURANT_EXTERNAL_TO_INTERNAL
+from .models import Order, OrderItem, Restaurant
+from .providers import kfc, silpo
+
+# from django.db.models import QuerySet
+
 
 @dataclass
 class TrackingOrder:
     restaurants: dict = field(default_factory=dict)
     delivery: dict = field(default_factory=dict)
+
 
 def all_orders_cooked(order_id: int):
     cache = CacheService()
@@ -34,6 +36,7 @@ def all_orders_cooked(order_id: int):
 
         return False
 
+
 @celery_app.task(queue="default")
 def order_delivery(order_id: int):
     print("DELIVERY PROCESSING")
@@ -50,7 +53,7 @@ def order_delivery(order_id: int):
 
     for rest_name, address in order.delivery_meta():
         addresses.append(address)
-        comments.append(f'Delivery to the {rest_name}')
+        comments.append(f"Delivery to the {rest_name}")
 
     order.status = OrderStatus.DELIVERED
     order.save()
@@ -88,6 +91,7 @@ def order_delivery(order_id: int):
     # cache.delete("orders", str(order_id))
 
     print("✅ DONE with Delivery")
+
 
 @celery_app.task(queue="high_priority")
 def order_in_silpo(order_id: int, items: list[dict]):
@@ -143,6 +147,7 @@ def order_in_silpo(order_id: int, items: list[dict]):
                     cooked = True
                     all_orders_cooked(order_id)
 
+
 @celery_app.task(queue="high_priority")
 def order_in_kfc(order_id: int, items: list[dict]):
     client = kfc.Client()
@@ -181,6 +186,7 @@ def order_in_kfc(order_id: int, items: list[dict]):
     if all_orders_cooked(order_id):
         cache.set(namespace="orders", key=str(order_id), value=asdict(tracking_order), ttl=3600)
         Order.objects.filter(id=order_id).update(status=OrderStatus.COOKED)
+
 
 def schedule_order(order: Order):
     cache = CacheService()

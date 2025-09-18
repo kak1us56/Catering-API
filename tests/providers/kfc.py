@@ -23,6 +23,7 @@ class OrderItem(BaseModel):
 class OrderRequestBody(BaseModel):
     order: list[OrderItem]
 
+
 async def update_order_status(order_id: str):
     ORDER_STATUSES: tuple[OrderStatus, ...] = ("cooking", "cooked", "finished")
     async with httpx.AsyncClient() as client:
@@ -40,6 +41,7 @@ async def update_order_status(order_id: str):
                 print(f"Webhook sent for {order_id} with status={status}")
             except Exception as e:
                 print(f"Failed to send webhook for {order_id}: {e}")
+
 
 @app.post("/api/orders")
 async def make_order(body: OrderRequestBody, background_tasks: BackgroundTasks):

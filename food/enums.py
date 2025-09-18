@@ -1,5 +1,6 @@
 import enum
 
+
 class OrderStatus(enum.StrEnum):
     NOT_STARTED = enum.auto()
     COOKING_REJECTED = enum.auto()
@@ -26,6 +27,7 @@ class OrderStatus(enum.StrEnum):
             results.append(_element)
 
         return results
+
 
 class DeliveryProvider(enum.StrEnum):
     UKLON = enum.auto()

@@ -1,15 +1,15 @@
-from django.shortcuts import render
-from .models import User
+# from django.shortcuts import render
 from typing import Any
 
 from django.contrib.auth.hashers import make_password
+from rest_framework import permissions, routers, serializers, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
-from rest_framework import routers, serializers, viewsets, permissions
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.decorators import action
 
+from .models import User
 from .services import ActivationService
 
 
@@ -29,7 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
             "password",
             "role",
         ]
-    
+
     def validate(self, attrs: dict[str, Any]):
         """Change the password for its hash to make Token-based authentication available."""
 
@@ -38,8 +38,10 @@ class UserSerializer(serializers.ModelSerializer):
 
         return super().validate(attrs=attrs)
 
+
 class UserActivationSerializer(serializers.Serializer):
     key = serializers.UUIDField()
+
 
 class ResendActivationSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
@@ -63,11 +65,13 @@ class UsersAPIViewSet(viewsets.GenericViewSet):
         serializer.save()
 
         activation_service = ActivationService(
-            email = getattr(serializer.instance, "email"),
+            email=getattr(serializer.instance, "email"),
         )
 
         activation_key = activation_service.create_activation_key()
-        activation_service.save_activation_information(activation_key=activation_key, user_id=getattr(serializer.instance, "id"))
+        activation_service.save_activation_information(
+            activation_key=activation_key, user_id=getattr(serializer.instance, "id")
+        )  # noqa: E501
         # activation_service.send_user_activation_email(activation_key=activation_key)
         activation_service.send_user_activation_email(activation_key=activation_key)
         return Response(UserSerializer(serializer.instance).data, status=201)
@@ -96,7 +100,6 @@ class UsersAPIViewSet(viewsets.GenericViewSet):
         activation_service.resend_user_activation_link(user_id=serializer.validated_data["user_id"])
 
         return Response(data=None, status=200)
-
 
 
 router = routers.DefaultRouter()

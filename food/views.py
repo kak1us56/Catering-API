@@ -2,51 +2,51 @@ import csv
 import io
 import json
 from dataclasses import asdict
-from datetime import date
-from django.shortcuts import render
+
+# from rest_framework.exceptions import ValidationError
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from rest_framework import permissions, routers, serializers, viewsets, filters
+from django.views.decorators.csrf import csrf_exempt
+from django_filters import rest_framework
+from rest_framework import permissions, routers, viewsets
+from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.decorators import action, permission_classes, api_view
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.permissions import IsAuthenticated
+
+# from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.exceptions import ValidationError
-from django.db import transaction
-from rest_framework.pagination import LimitOffsetPagination
-from django_filters.rest_framework import DjangoFilterBackend
-from django_filters import rest_framework
 
-from users.models import Role, User
 from shared.cache import CacheService
-from .mapper import RESTAURANT_EXTERNAL_TO_INTERNAL
-from .providers import kfc
+from users.models import Role, User
 
+from .mapper import RESTAURANT_EXTERNAL_TO_INTERNAL
 from .models import Dish, Order, OrderItem, OrderStatus, Restaurant
-from .serializers import OrderSerializer, KFCOrderSerializer, RestaurantSerializer, OrderItemSerializer, DishSerializer
-from .enums import DeliveryProvider
-from .services import schedule_order, all_orders_cooked, TrackingOrder
+from .providers import kfc
+from .serializers import DishSerializer, OrderSerializer, RestaurantSerializer
+from .services import TrackingOrder, all_orders_cooked, schedule_order
+
 
 class RestaurantFilters(rest_framework.FilterSet):
     class Meta:
         model = Restaurant
-        fields = ['name']
+        fields = ["name"]
+
 
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         user = request.user
         if not user or not user.is_authenticated:
             return False
-        return getattr(user, 'role', None) == Role.ADMIN
+        return getattr(user, "role", None) == Role.ADMIN
+
 
 class FoodAPIViewSet(viewsets.GenericViewSet):
     queryset = Restaurant.objects.all()
     authentication_classes = [JWTAuthentication]
 
     def get_permissions(self):
-        if self.action == 'create_dish':
+        if self.action == "create_dish":
             return [IsAdmin()]
         return super().get_permissions()
 
@@ -56,7 +56,7 @@ class FoodAPIViewSet(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
 
         assert type(request.user) is User
-        print('create_order')
+        print("create_order")
         with transaction.atomic():
             order = Order.objects.create(
                 status=OrderStatus.NOT_STARTED,
@@ -108,6 +108,7 @@ class FoodAPIViewSet(viewsets.GenericViewSet):
             serializer = RestaurantSerializer(filtered_queryset, many=True, context={"request": request})
             return Response(data=serializer.data)
 
+
 # @api_view(["POST"])
 # @permission_classes([IsAdmin])
 def import_dishes(request):
@@ -141,6 +142,7 @@ def import_dishes(request):
 
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
+
 @csrf_exempt
 def kfc_webhook(request):
     print("KFC Webhook is Handled")
@@ -161,7 +163,7 @@ def kfc_webhook(request):
     kfc_cache_order = cache.get("kfc_orders", key=external_id)
 
     if not kfc_cache_order:
-        print(f'KFC webhook received for unknown order_id={external_id}')
+        print(f"KFC webhook received for unknown order_id={external_id}")
         return JsonResponse({"error": "Order not found"}, status=404)
 
     def get_internal_status(status: kfc.OrderStatus) -> OrderStatus:
@@ -183,6 +185,7 @@ def kfc_webhook(request):
         all_orders_cooked(order.pk)
 
     return JsonResponse({"message": "ok"})
+
 
 router = routers.DefaultRouter()
 router.register(prefix="", viewset=FoodAPIViewSet, basename="food")

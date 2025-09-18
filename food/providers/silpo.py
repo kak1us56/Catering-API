@@ -1,8 +1,9 @@
 import enum
 import os
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 
 import httpx
+
 
 class OrderStatus(enum.StrEnum):
     NOT_STARTED = "not started"
@@ -10,19 +11,23 @@ class OrderStatus(enum.StrEnum):
     COOKED = "cooked"
     FINISHED = "finished"
 
+
 @dataclass
 class OrderItem:
     dish: str
     quantity: int
 
+
 @dataclass
 class OrderRequestBody:
     order: list[OrderItem]
+
 
 @dataclass
 class OrderResponse:
     id: str
     status: OrderStatus
+
 
 class Client:
     # BASE_URL = "http://localhost:8001/api/orders"

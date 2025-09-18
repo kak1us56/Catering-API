@@ -21,6 +21,17 @@ dockerdown:
 	docker compose down
 
 
+fix:
+	python -m black .
+	python -m isort .
+
+check:
+	python -m flake8 .
+	python -m black --check .
+	python -m isort --check .
+	python -m mypy --check-untyped-defs .
+
+
 silpo_mock:
 	python3 -m uvicorn tests.providers.silpo:app --port 8001 --reload
 

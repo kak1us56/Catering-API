@@ -10,9 +10,11 @@ STORAGE: dict[str, dict] = {}
 
 app = FastAPI()
 
+
 class OrderRequestBody(BaseModel):
     addresses: list[str] = Field(min_length=1)
     comments: list[str] = Field(min_length=1)
+
 
 async def delivery(order_id: str):
     for _ in range(5):
@@ -22,9 +24,10 @@ async def delivery(order_id: str):
         await asyncio.sleep(1)
         for _ in range(5):
             STORAGE[order_id]["location"] = (random.random(), random.random())
-            await asyncio.sleep(.5)
+            await asyncio.sleep(0.5)
 
         print(f"Delivered to {address}")
+
 
 async def update_order_status(order_id: str):
     for status in ORDER_STATUSES[1:]:
@@ -35,7 +38,8 @@ async def update_order_status(order_id: str):
             await delivery(order_id)
 
         STORAGE[order_id]["status"] = status
-        print(f'UKLON: [{order_id}] --> {status}]')
+        print(f"UKLON: [{order_id}] --> {status}]")
+
 
 @app.post("/drivers/orders")
 def make_order(body: OrderRequestBody, background_tasks: BackgroundTasks):
@@ -52,6 +56,7 @@ def make_order(body: OrderRequestBody, background_tasks: BackgroundTasks):
     background_tasks.add_task(update_order_status, order_id)
 
     return STORAGE.get(order_id, {"error": "no such order"})
+
 
 @app.get("/drivers/orders/{order_id}")
 def get_order(order_id: str):

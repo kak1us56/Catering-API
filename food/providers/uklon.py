@@ -4,15 +4,18 @@ from dataclasses import asdict, dataclass
 
 import httpx
 
+
 class OrderStatus(enum.StrEnum):
     NOT_STARTED = "not started"
     DELIVERY = "delivery"
     DELIVERED = "delivered"
 
+
 @dataclass
 class OrderRequestBody:
     addresses: list[str]
     comments: list[str]
+
 
 @dataclass
 class OrderResponse:
@@ -25,6 +28,7 @@ class OrderResponse:
     @property
     def id(self):
         return self.order_id
+
 
 class Client:
     BASE_URL = os.getenv("UKLON_BASE_URL", "http://uklon-mock:8003/drivers/orders")

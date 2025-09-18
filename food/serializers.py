@@ -1,30 +1,32 @@
 from datetime import date
 
-from .models import Dish, Order, OrderItem, OrderStatus, Restaurant
-from .enums import DeliveryProvider
-from rest_framework.pagination import LimitOffsetPagination
-from django_filters.rest_framework import DjangoFilterBackend
+# from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.pagination import LimitOffsetPagination
+
+from .models import Dish, Order, OrderItem, OrderStatus, Restaurant
+
 
 class DishSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dish
         fields = "__all__"
 
+
 class RestaurantSerializer(serializers.ModelSerializer):
     dishes = serializers.SerializerMethodField()
 
     class Meta:
         model = Restaurant
-        fields = '__all__'
+        fields = "__all__"
 
     def get_dishes(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
 
         dishes = obj.dishes.all()
 
-        search_query = request.query_params.get('search')
+        search_query = request.query_params.get("search")
         if search_query:
             dishes = dishes.filter(name__icontains=search_query)
 
@@ -35,13 +37,15 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
         return DishSerializer(page, many=True).data
 
+
 class OrderItemSerializer(serializers.ModelSerializer):
     dish = serializers.PrimaryKeyRelatedField(queryset=Dish.objects.all())
     quantity = serializers.IntegerField(min_value=1, max_value=20)
 
     class Meta:
         model = OrderItem
-        fields = ['dish', 'quantity']
+        fields = ["dish", "quantity"]
+
 
 class OrderSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -71,6 +75,7 @@ class OrderSerializer(serializers.ModelSerializer):
             raise ValidationError("ETA must be min 1 day after today.")
         else:
             return value
+
 
 class KFCOrderSerializer(serializers.Serializer):
     pass

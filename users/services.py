@@ -1,11 +1,14 @@
 import uuid
-from shared.cache import CacheService
+
 from django.conf import settings
+from django.core.mail import send_mail
 from rest_framework.exceptions import ValidationError
 
-from django.core.mail import send_mail
+from shared.cache import CacheService
+
 from .models import User
 from .tasks import send_user_activation_email_task
+
 
 class ActivationService:
     UUID_NAMESPACE = uuid.uuid4()
@@ -63,4 +66,4 @@ class ActivationService:
             message=f"Please, activate your account: {activation_link}",
             from_email="admin@catering.com",
             recipient_list=[user.email],
-            )
+        )

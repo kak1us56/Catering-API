@@ -1,8 +1,10 @@
-from django.db import models
 from enum import StrEnum, auto
-from django.contrib.auth.hashers import make_password
+
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import PermissionsMixin
+from django.db import models
+
 
 # Create your models here.
 class Role(StrEnum):
@@ -21,11 +23,12 @@ class Role(StrEnum):
 
         return results
 
+
 class UserManager(BaseUserManager):
     def create_user(self, email: str, password: str, **extra_fields):
         email = self.normalize_email(email)
         password = make_password(password)
-        
+
         extra_fields["is_active"] = False
         extra_fields["is_staff"] = False
         extra_fields["is_superuser"] = False
@@ -64,9 +67,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
-    role = models.CharField(
-        max_length=50, default=Role.CUSTOMER, choices=Role.choices()
-    )
+    role = models.CharField(max_length=50, default=Role.CUSTOMER, choices=Role.choices())
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "email"

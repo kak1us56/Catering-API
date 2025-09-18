@@ -1,17 +1,21 @@
-import os
 import json
+import os
 from dataclasses import dataclass
 
 import redis
+
 
 @dataclass
 class Sctucture:
     id: int
     name: str
 
+
 class CacheService:
     def __init__(self):
-        self.connection: redis.Redis = redis.Redis.from_url(os.getenv("DJANGO_CACHE_URL", default="redis://localhost:6379/0"))
+        self.connection: redis.Redis = redis.Redis.from_url(
+            os.getenv("DJANGO_CACHE_URL", default="redis://localhost:6379/0")
+        )
         # self.connection: redis.Redis = redis.Redis.from_url("redis://localhost:6379/0")
 
     @staticmethod
