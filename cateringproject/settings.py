@@ -39,9 +39,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "rest_framework",
     "rest_framework_simplejwt",
+    "drf_spectacular",
     "django_filters",
+
     "food",
     "users",
 ]
@@ -146,6 +149,14 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 2,
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {"anon": "100/day", "user": "1000/day"},
+
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -189,4 +200,11 @@ CELERY_TASK_QUEUES = {
     "default": {"exchange": "default", "routing_key": "default"},
     "high_priority": {"exchange": "high_priority", "routing_key": "high_priority"},
     "low_priority": {"exchange": "low_priority", "routing_key": "low_priority"},
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Catering API",
+    "DESCRIPTION": "Catering API",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }

@@ -1,8 +1,10 @@
 from django.contrib import admin
+from django.conf import settings
 from django.urls import include, path
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
 )
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 from food.views import import_dishes, kfc_webhook
 from food.views import router as food_router
@@ -19,3 +21,11 @@ urlpatterns = [
         kfc_webhook,
     ),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        # Open API
+        path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+        path("api/schema/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+        path("api/schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    ]
