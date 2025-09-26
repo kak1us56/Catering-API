@@ -20,6 +20,8 @@ docker:
 dockerdown:
 	docker compose down
 
+test:
+	python -m pytest tests/
 
 fix:
 	python -m black .

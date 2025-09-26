@@ -1,10 +1,10 @@
-from django.contrib import admin
 from django.conf import settings
+from django.contrib import admin
 from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
 )
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 from food.views import import_dishes, kfc_webhook
 from food.views import router as food_router

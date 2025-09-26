@@ -46,11 +46,13 @@ class FoodAPIViewSet(viewsets.GenericViewSet):
     authentication_classes = [JWTAuthentication]
 
     def get_permissions(self):
-        if self.action == "create_dish":
-            return [IsAdmin()]
-        return super().get_permissions()
+        match self.action:
+            case "all_orders":
+                return [permissions.IsAuthenticated(), IsAdmin()]
+            case _:
+                return [permissions.IsAuthenticated()]
 
-    @action(methods=["post"], detail=False, url_path=r"orders")
+    @action(methods=["post"], detail=False, url_path=r"orders", url_name="orders")
     def create_order(self, request: Request) -> Response:
         serializer = OrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -87,7 +89,7 @@ class FoodAPIViewSet(viewsets.GenericViewSet):
     #     serializer = RestaurantSerializer(restaurants, many=True)
     #     return Response(data=serializer.data)
 
-    @action(methods=["post", "get"], detail=False, url_path=r"dishes")
+    @action(methods=["post", "get"], detail=False, url_path=r"dishes", url_name="dishes-list")
     def dishes(self, request: Request) -> Response:
         if request.method == "POST":
             if not IsAdmin().has_permission(request, self):

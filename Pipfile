@@ -14,7 +14,6 @@ gunicorn = "==23.0.0"
 django-filter = "*"
 httpx = "~=0.28.1"
 types-django-filter = "*"
-#drf_spectacular = "~=0.28.0"
 drf-spectacular = "*"
 
 [dev-packages]
@@ -30,6 +29,8 @@ uvicorn = "~=0.35.0"
 pydantic = "~=2.11.7"
 celery-types = "~=0.23.0"
 watchdog = "~=6.0.0"
+pytest-django = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.13"
