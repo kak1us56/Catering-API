@@ -152,7 +152,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    # "DEFAULT_THROTTLE_RATES": {"anon": "100/day", "user": "1000/day"},
+    "DEFAULT_THROTTLE_RATES": {"anon": "100/day", "user": "1000/day"},
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
@@ -170,8 +170,8 @@ SIMPLE_JWT = {
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        # "LOCATION": os.getenv("DJANGO_CACHE_URL", default="redis://localhost:6379/0"),
-        "LOCATION": "redis://localhost:6379/0",
+        "LOCATION": os.getenv("DJANGO_CACHE_URL", default="redis://localhost:6379/0"),
+        # "LOCATION": "redis://localhost:6379/0",
         "TIMEOUT": 50,
     }
 }
