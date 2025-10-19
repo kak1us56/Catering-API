@@ -1,5 +1,6 @@
 from dataclasses import asdict, dataclass, field
 from time import sleep
+from celery.schedules import crontab
 
 from cateringproject import celery_app
 from food.providers import uklon
@@ -7,8 +8,12 @@ from shared.cache import CacheService
 
 from .enums import OrderStatus
 from .mapper import RESTAURANT_EXTERNAL_TO_INTERNAL
-from .models import Order, OrderItem, Restaurant
+from .models import Order, OrderItem, Restaurant, Dish
 from .providers import kfc, silpo
+from shared.cache import CacheService
+from shared.llm import LLMService
+from users.models import User, Role
+from .serializers import OrderSerializer, DishSerializer
 
 # from django.db.models import QuerySet
 
@@ -210,3 +215,73 @@ def schedule_order(order: Order):
                 order_in_silpo.delay(order.pk, list(items.values("id", "dish__name", "quantity")))
             case _:
                 raise ValueError(f"Restaurant {restaurant.name} is not supported")
+
+
+def get_food_recommendations(user_id: int) -> dict:
+    cache = CacheService()
+    items = cache.get("recommendations", str(user_id))
+    if items and "dishes" in items:
+        return {"recommendations": items["dishes"]}
+    
+    return {"recommendations": []}
+
+
+@celery_app.task(queue="default")
+def generate_recommendations():
+    """Generate recommendations for each user in the system and put them to the cache."""
+
+    LIMIT_ORDERS = 5
+    RECOMMENDATION_THRESHOLD = 2
+    users = User.objects.filter(role=Role.CUSTOMER)
+    llm = LLMService()
+    cache = CacheService()
+
+    for user in users:
+        print(f"✨ Checking orders for {user.email}")
+        last_orders = user.orders.filter(status=OrderStatus.DELIVERED).order_by("-id")[:LIMIT_ORDERS]
+        if not last_orders.exists():
+            print(f"⏩ User {user.email} has no delivered orders. Skipping.")
+            continue
+
+        order_serializer = OrderSerializer(last_orders, many=True)
+        
+        print("+++++++++++++++++++++++")
+        print(order_serializer.data)
+        print("+++++++++++++++++++++++")
+
+        prompt = f"""
+        Below you can see the list of orders:
+        {order_serializer.data}
+
+        Return me up to {RECOMMENDATION_THRESHOLD} top dishes according to this list.
+        Return it without any verbosity except of comma separated ids.
+
+        The response will be used in Python to split data by comma and
+        convert to the integer all the ids.
+        """
+
+        response = llm.ask(prompt)
+        print(f"✨ LLM Result: {response}")
+
+        try:
+            dishes_ids: list[int] = [int(dish_id) for dish_id in response.split(",")]
+        except ValueError as error:
+            raise ValueError(f"LLM return invalid IDs for dishes: {response}") from error
+        
+        dishes = Dish.objects.filter(id__in=dishes_ids)
+        if dishes.count() != len(dishes_ids):
+            raise ValueError("Some of returned dishes are not in the database")
+        
+        serializer = DishSerializer(dishes, many=True)
+        value = {"dishes": serializer.data}
+        cache.set(namespace="recommendations", key=str(user.pk), value=value)
+        print(f"✅ Data saved to the cache: {value}")
+
+
+celery_app.conf.beat_schedule = {
+    'execute-generating-recommendations-every-24h': {
+        'task': 'food.services.generate_recommendations',
+        'schedule': crontab(hour=0)
+    },
+}
+celery_app.conf.timezone = 'UTC'

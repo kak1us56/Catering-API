@@ -21,4 +21,5 @@ class DishOrderItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ("__str__", "id", "status")
+    search_fields = ("user",)
     inlines = (DishOrderItemInline,)

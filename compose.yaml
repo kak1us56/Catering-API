@@ -14,6 +14,17 @@ services:
       - mailing
     volumes:
       - ./:/app/
+  beat:
+    <<: *api
+    container_name: catering-beat
+    entrypoint: bash
+    command: -c "rm -f /tmp/celerybeat.pid && celery -A cateringproject beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    depends_on:
+      - broker
+      - database
+    ports: []
+    environment:
+      - C_FORCE_ROOT=true
   worker-default:
     <<: *api
     container_name: catering-worker-default
@@ -43,7 +54,7 @@ services:
       - C_FORCE_ROOT=true
     depends_on:
       - broker
-    ports: [ ]
+    ports: []
   database:
     image: postgres:17.5
     env_file: .env
