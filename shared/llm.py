@@ -1,7 +1,7 @@
 from openai import OpenAI
-import os
 
 SYSTEM_PROMPT = "..."
+
 
 class LLMService:
     def __init__(self) -> None:

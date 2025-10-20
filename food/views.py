@@ -24,7 +24,13 @@ from .mapper import RESTAURANT_EXTERNAL_TO_INTERNAL
 from .models import Dish, Order, OrderItem, OrderStatus, Restaurant
 from .providers import kfc
 from .serializers import DishSerializer, OrderSerializer, RestaurantSerializer
-from .services import TrackingOrder, all_orders_cooked, schedule_order, get_food_recommendations, generate_recommendations
+from .services import (
+    TrackingOrder,
+    all_orders_cooked,
+    generate_recommendations,
+    get_food_recommendations,
+    schedule_order,
+)
 
 
 class RestaurantFilters(rest_framework.FilterSet):
@@ -109,10 +115,10 @@ class FoodAPIViewSet(viewsets.GenericViewSet):
 
             serializer = RestaurantSerializer(filtered_queryset, many=True, context={"request": request})
             return Response(data=serializer.data)
-    
+
     @action(methods=["post"], detail=False, url_path=r"recommendations/generate")
     def recommendations_generate(self, request: Request) -> Response:
-        generate_recommendations.delay()
+        generate_recommendations()
 
         return Response(data={"message": "Users recommendations started generating"})
 

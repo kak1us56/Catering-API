@@ -153,7 +153,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "100/day", "user": "1000/day"},
+    # "DEFAULT_THROTTLE_RATES": {"anon": "100/day", "user": "1000/day"},
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
@@ -171,16 +171,23 @@ SIMPLE_JWT = {
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": os.getenv("DJANGO_CACHE_URL", default="redis://localhost:6379/0"),
-        # "LOCATION": "redis://localhost:6379/0",
+        # "LOCATION": os.getenv("DJANGO_CACHE_URL", default="redis://localhost:6379/0"),
+        "LOCATION": "redis://localhost:6379/0",
         "TIMEOUT": 50,
     }
 }
 
-if DEBUG is True and ("test" in sys.argv):
+if DEBUG is True and ("tests/" in sys.argv):
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        }
+    }
+    CELERY_BROKER_URL = "amqp://guest:guest@localhost:5672//"
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
@@ -192,8 +199,8 @@ EMAIL_PORT = int(os.getenv("DJANGO_EMAIL_PORT", default="1025"))
 # CELERY SECTION
 # ==============================
 # CELERY_ACCEPT_CONTENT
-CELERY_BROKER_URL = os.getenv("DJANGO_BROKER_URL", default="amqp://guest:guest@localhost:5672//")
-# CELERY_BROKER_URL = "amqp://guest:guest@localhost:5672//"
+# CELERY_BROKER_URL = os.getenv("DJANGO_BROKER_URL", default="amqp://guest:guest@localhost:5672//")
+CELERY_BROKER_URL = "amqp://guest:guest@localhost:5672//"
 CELERY_ACCEPT_CONTENT = [
     "pickle",
     "application/json",

@@ -13,10 +13,10 @@ class Sctucture:
 
 class CacheService:
     def __init__(self):
-        self.connection: redis.Redis = redis.Redis.from_url(
-            os.getenv("DJANGO_CACHE_URL", default="redis://localhost:6379/0")
-        )
-        # self.connection: redis.Redis = redis.Redis.from_url("redis://localhost:6379/0")
+        # self.connection: redis.Redis = redis.Redis.from_url(
+        #     os.getenv("DJANGO_CACHE_URL", default="redis://localhost:6379/0")
+        # )
+        self.connection: redis.Redis = redis.Redis.from_url("redis://localhost:6379/0")
 
     @staticmethod
     def _build_key(namespace: str, key: str) -> str:

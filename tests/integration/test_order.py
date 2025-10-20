@@ -79,7 +79,7 @@ class OrderTestCase(TestCase):
             "user": self.john.id,
             "items": [{"dish": self.dish1.id, "quantity": 2}, {"dish": self.dish2.id, "quantity": 1}],
         }
-        print(order_day_calculate)
+
         response = self.client.post(reverse("food-orders"), data=request_body, format="json")
         resp = response.json()
 

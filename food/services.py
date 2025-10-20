@@ -1,19 +1,19 @@
 from dataclasses import asdict, dataclass, field
 from time import sleep
+
 from celery.schedules import crontab
 
 from cateringproject import celery_app
 from food.providers import uklon
 from shared.cache import CacheService
+from shared.llm import LLMService
+from users.models import Role, User
 
 from .enums import OrderStatus
 from .mapper import RESTAURANT_EXTERNAL_TO_INTERNAL
-from .models import Order, OrderItem, Restaurant, Dish
+from .models import Dish, Order, OrderItem, Restaurant
 from .providers import kfc, silpo
-from shared.cache import CacheService
-from shared.llm import LLMService
-from users.models import User, Role
-from .serializers import OrderSerializer, DishSerializer
+from .serializers import DishSerializer, OrderSerializer
 
 # from django.db.models import QuerySet
 
@@ -219,11 +219,14 @@ def schedule_order(order: Order):
 
 def get_food_recommendations(user_id: int) -> dict:
     cache = CacheService()
-    items = cache.get("recommendations", str(user_id))
-    if items and "dishes" in items:
-        return {"recommendations": items["dishes"]}
-    
-    return {"recommendations": []}
+
+    try:
+        items = cache.get("recommendations", str(user_id))
+        if items and "dishes" in items:
+            return {"recommendations": items["dishes"]}
+    except TypeError:
+        print("There is no data with recommendations in the cache")
+        return {"recommendations": []}
 
 
 @celery_app.task(queue="default")
@@ -244,7 +247,7 @@ def generate_recommendations():
             continue
 
         order_serializer = OrderSerializer(last_orders, many=True)
-        
+
         print("+++++++++++++++++++++++")
         print(order_serializer.data)
         print("+++++++++++++++++++++++")
@@ -267,11 +270,11 @@ def generate_recommendations():
             dishes_ids: list[int] = [int(dish_id) for dish_id in response.split(",")]
         except ValueError as error:
             raise ValueError(f"LLM return invalid IDs for dishes: {response}") from error
-        
+
         dishes = Dish.objects.filter(id__in=dishes_ids)
         if dishes.count() != len(dishes_ids):
             raise ValueError("Some of returned dishes are not in the database")
-        
+
         serializer = DishSerializer(dishes, many=True)
         value = {"dishes": serializer.data}
         cache.set(namespace="recommendations", key=str(user.pk), value=value)
@@ -279,9 +282,9 @@ def generate_recommendations():
 
 
 celery_app.conf.beat_schedule = {
-    'execute-generating-recommendations-every-24h': {
-        'task': 'food.services.generate_recommendations',
-        'schedule': crontab(hour=0)
+    "execute-generating-recommendations-every-24h": {
+        "task": "food.services.generate_recommendations",
+        "schedule": crontab(hour=0),
     },
 }
-celery_app.conf.timezone = 'UTC'
+celery_app.conf.timezone = "UTC"
